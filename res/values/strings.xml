@@ -3,5 +3,10 @@
 
     <string name="app_name">Group10B_InClass04</string>
     <string name="hello_world">Hello world!</string>
+    <string name="defaultComplexityValue">0</string>
+    <string name="complexity_label_string">Select Complexity:</string>
+    
+    <string name="button_thread">Generate Number Thread</string>
+    <string name="button_async">Generate Number Async Task</string>
 
 </resources>
