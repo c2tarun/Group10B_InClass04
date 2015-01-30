@@ -8,5 +8,8 @@
     
     <string name="button_thread">Generate Number Thread</string>
     <string name="button_async">Generate Number Async Task</string>
+    
+    <string name="times">Times</string>
+    <string name="progress_titles">Retrieving the number...</string>
 
 </resources>

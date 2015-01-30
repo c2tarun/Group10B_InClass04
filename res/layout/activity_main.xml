@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="10dp"
     tools:context="${relativePackage}.${activityClass}" >
 
     <TextView
@@ -11,7 +12,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:text="@string/complexity_label_string"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/complexityValue"
@@ -19,7 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:text="@string/defaultComplexityValue"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <SeekBar
@@ -28,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/complexityLabel"
-        android:max="10" />
+        android:max="9" />
 
     <TextView
         android:id="@+id/result"
@@ -38,7 +39,6 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/complexityBar"
         android:layout_marginTop="55dp"
-        android:text="Medium Text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button

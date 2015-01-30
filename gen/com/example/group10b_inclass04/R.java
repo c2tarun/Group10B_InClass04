@@ -31,6 +31,8 @@ public final class R {
         public static final int complexity_label_string=0x7f040003;
         public static final int defaultComplexityValue=0x7f040002;
         public static final int hello_world=0x7f040001;
+        public static final int progress_titles=0x7f040007;
+        public static final int times=0x7f040006;
     }
     public static final class style {
         /** 

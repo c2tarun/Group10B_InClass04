@@ -1,9 +1,14 @@
 package com.example.group10b_inclass04;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,8 +32,11 @@ public class MainActivity extends Activity {
 	SeekBar complexityBar;
 	TextView complexityValue;
 	TextView resultView;
+	Handler handler;
+	ExecutorService threadpool;
 
 	ProgressDialog asyncProgress;
+	ProgressDialog progressDialog;
 	Button asyncButton;
 
 	@Override
@@ -56,10 +64,11 @@ public class MainActivity extends Activity {
 					public void onProgressChanged(SeekBar seekBar,
 							int progress, boolean fromUser) {
 						// TODO Auto-generated method stub
-						progress = (progress == 0) ? 1 : progress;
-						complexityValue.setText(progress + "");
+						progress++;
+						complexityValue.setText(progress + " " + getResources().getString(R.string.times));
 					}
 				});
+		complexityValue.setText((complexityBar.getProgress() + 1) + " " + getResources().getString(R.string.times));
 		asyncButton = (Button) findViewById(R.id.asyncButton);
 		asyncButton.setOnClickListener(new View.OnClickListener() {
 
@@ -67,8 +76,50 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				int complexity = complexityBar.getProgress();
-				complexity = (complexity == 0) ? 1 : complexity;
+				complexity++;
 				new DoWork().execute(complexity);
+			}
+		});
+
+		threadpool = Executors.newFixedThreadPool(2);
+
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setCancelable(false);
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		progressDialog.setTitle(R.string.progress_titles);
+
+		findViewById(R.id.threadButton).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						progressDialog.setMax(complexityBar.getProgress() + 1);
+						int complexity = complexityBar.getProgress();
+						complexity++;
+						threadpool.execute(new DoThreads(complexity));
+					}
+				});
+
+		handler = new Handler(new Handler.Callback() {
+			@Override
+			public boolean handleMessage(Message msg) {
+				switch (msg.what) {
+				case DoThreads.STATUS_START:
+					progressDialog.show();
+					break;
+				case DoThreads.STATUS_STEP:
+					progressDialog.setProgress((Integer) msg.obj);
+					break;
+				case DoThreads.STATUS_DONE:
+					Double value;
+					value = msg.getData().getDouble(DoThreads.RESULT);
+					resultView.setText(value + "");
+					progressDialog.dismiss();
+					break;
+
+				default:
+					break;
+				}
+				return false;
 			}
 		});
 
@@ -82,8 +133,9 @@ public class MainActivity extends Activity {
 			super.onPreExecute();
 			asyncProgress = new ProgressDialog(MainActivity.this);
 			asyncProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			asyncProgress.setMax(100);
+			asyncProgress.setMax(complexityBar.getProgress() + 1);
 			asyncProgress.setCancelable(false);
+			asyncProgress.setTitle(R.string.progress_titles);
 			asyncProgress.show();
 		}
 
@@ -96,16 +148,11 @@ public class MainActivity extends Activity {
 
 			for (int i = 0; i < counter; i++) {
 				number += HeavyWork.getNumber();
-				publishProgress(calculateProgressValue(i + 1, counter));
+				publishProgress(i + 1);
 			}
 
 			number = number / counter;
 			return number;
-		}
-
-		public int calculateProgressValue(int i, int counter) {
-			Double percent = (double) ((i * 100) / counter);
-			return percent.intValue();
 		}
 
 		@Override
@@ -126,4 +173,42 @@ public class MainActivity extends Activity {
 
 	}
 
+	class DoThreads implements Runnable {
+		int counter;
+		Double number = 0.0d;
+		Double result;
+		public static final String RESULT = "result";
+		static final int STATUS_START = 0;
+		static final int STATUS_STEP = 1;
+		static final int STATUS_DONE = 2;
+
+		public DoThreads(int counter) {
+			super();
+			this.counter = counter;
+		}
+
+		@Override
+		public void run() {
+			Message msg = new Message();
+			msg.what = STATUS_START;
+			handler.sendMessage(msg);
+			for (int i = 0; i < counter; i++) {
+				number = number + HeavyWork.getNumber();
+				msg = new Message();
+				msg.what = STATUS_STEP;
+				msg.obj = i + 1;
+				handler.sendMessage(msg);
+			}
+			result = number / counter;
+			msg = new Message();
+			Bundle data = new Bundle();
+			Log.d("demo", "Result calculated " + result);
+			data.putDouble(RESULT, result);
+			msg.setData(data);
+
+			msg.what = STATUS_DONE;
+			handler.sendMessage(msg);
+		}
+
+	}
 }
